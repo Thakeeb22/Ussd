@@ -49,6 +49,9 @@ app.post("/ussd", (req, res) =>{
     res.set("Content-Type", "text/plain")
     res.status(200).send(response)
 })
+app.get("/", (req, res) =>{
+    res.send("USSD server running")
+})
 app.listen(PORT, () =>{
     console.log("Server is running on port 3000")
 })
