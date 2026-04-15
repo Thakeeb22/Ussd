@@ -15,14 +15,15 @@ const User = mongoose.model("User", {
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: false}))
 app.post("/ussd", (req, res) =>{
+    console.log("USSD REQUEST:", req.body)
     //Read the variables
     const{
         sessionId,
         serviceCode,
-        phoneNumber,
-        text,
     }= req.body;
-    let response = ""
+    const text = req.body.text || "";
+    const phoneNumber = req.body.phoneNumber || "";
+    let response = "";
     if(text == ""){
         // this is the first request
         response = `CON What will you like to check
@@ -46,7 +47,7 @@ app.post("/ussd", (req, res) =>{
     }
     // send response back to api
     res.set("Content-Type", "text/plain")
-    res.send(response)
+    res.status(200).send(response)
 })
 app.listen(PORT, () =>{
     console.log("Server is running on port 3000")
