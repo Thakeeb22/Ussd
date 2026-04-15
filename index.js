@@ -45,7 +45,7 @@ app.post("/ussd", (req, res) =>{
         response = `END Your Balance is ${balance}`
     }
     // send response back to api
-    res.set("Content-Type text/plain")
+    res.set("Content-Type", "text/plain")
     res.send(response)
 })
 app.listen(PORT, () =>{
