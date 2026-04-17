@@ -6,7 +6,7 @@ const PORT = process.env.PORT || 3000;
 const mongoose = require("mongoose");
 
 mongoose
-  .connect(process.env.MONGODO_URI)
+  .connect(process.env.MONGODB_URI)
   .then(() => console.log("MongoDB Connected Successfully"))
   .catch((err) => console.log(err));
 const User = mongoose.model("User", {
