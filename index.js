@@ -37,10 +37,10 @@ app.post("/ussd", async (req, res) => {
     // Register
   } else if (text === "1") {
     response = `CON Enter Your Name`;
-  } else if (data[0] === "1" && data.lenght === 2) {
+  } else if (data[0] === "1" && data.length === 2) {
     // save name temporarilly
     response = `CON Enter Your Balance`;
-  } else if (data[0] === "1" && data.lenght === 3) {
+  } else if (data[0] === "1" && data.length === 3) {
     const name = data[1];
     const balance = data[2];
     const accountNumber = generateAccountNumber();
