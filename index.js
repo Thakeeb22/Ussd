@@ -1,57 +1,78 @@
-const express = require("express")
-const bodyParser = require("body-parser")
-const app = express()
-const PORT = process.env.PORT || 3000
-/*const mongoose = require("mongoose");
+const express = require("express");
+const bodyParser = require("body-parser");
+const app = express();
+const PORT = process.env.PORT || 3000;
+const mongoose = require("mongoose");
 
-mongoose.connect("mongodb://127.0.0.1:27017/ussd_test")
-.then(() => console.log("MongoDB connected"))
-.catch(err => console.log(err));
+mongoose
+  .connect("mongodb://127.0.0.1:27017/ussd_test")
+  .then(() => console.log("MongoDB Connected Successfully"))
+  .catch((err) => console.log(err));
 const User = mongoose.model("User", {
   phone: String,
+  name: String,
   accountNumber: String,
-  balance: String
-});*/
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({extended: false}))
-app.post("/ussd", (req, res) =>{
-    console.log("USSD REQUEST:", req.body)
-    //Read the variables
-    const{
-        sessionId,
-        serviceCode,
-    }= req.body;
-    const text = req.body.text || "";
-    const phoneNumber = req.body.phoneNumber || "";
-    let response = "";
-    if(text == ""){
-        // this is the first request
-        response = `CON What will you like to check
-        1. My Account
-        2. My Phone Number`
-    }else if(text == "1"){
-        // business logic for first level response
-        response = `CON Choose account information you want to view
-        1. Account Number
-        2. Account Balance`
-    }else if(text == "2"){
-        // get phone number from database
-        response = `END Your Phone Number is ${phoneNumber}`
-    }else if(text == "1*1"){
-        const accountNumber = "Acct1001"
-        response = `END Your Account Number is ${accountNumber}`
-    }else if(text == "1*2"){
-        // get balance from database
-        const balance = "₦10,000"
-        response = `END Your Balance is ${balance}`
+  balance: String,
+});
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+
+app.post("/ussd", async (req, res) => {
+  console.log("USSD REQUEST:", req.body);
+
+  //Read the variables
+  const { phoneNumber, text } = req.body;
+  let response = "";
+  //   split input
+  const data = text.split("*");
+  //   check if user exist
+  let user = await User.findOne({ phone: phoneNumber });
+
+  if (text === "") {
+    // this is the first request
+    response = `CON Welcome to Test App
+        1. Register
+        2. My Account`;
+    // Register
+  } else if (text === "1") {
+    response = `CON Enter Your Name`;
+  } else if (data[0] === "1" && data.lenght === 2) {
+    // save name temporarilly
+    response = `CON Enter Your Balance`;
+  } else if (data[0] === "1" && data.lenght === 3) {
+    const name = data[1];
+    const balance = data[2];
+    const accountNumber = generateAccountNumber();
+    await User.create({
+      phone: phoneNumber,
+      name,
+      balance,
+      accountNumber,
+    });
+    response = `END Registered successfully
+    Acct:${accountNumber}`;
+    // view account
+  } else if (text === "2") {
+    if (!user) {
+      response = `END You are not registered`;
+    } else {
+      response = `END Name: ${user.name}
+        Acct:${user.accountNumber}
+        Balance:${user.balance}`;
     }
-    // send response back to api
-    res.set("Content-Type", "text/plain")
-    res.status(200).send(response)
-})
-app.get("/", (req, res) =>{
-    res.send("USSD server running")
-})
-app.listen(PORT, () =>{
-    console.log("Server is running on port 3000")
-})
+  } else {
+    response = `END Invalid option`;
+  }
+  // send response back to api
+  res.set("Content-Type", "text/plain");
+  res.status(200).send(response);
+});
+app.get("/", (req, res) => {
+  res.send("USSD server running");
+});
+app.listen(PORT, () => {
+  console.log("Server is running on port 3000");
+});
+function generateAccountNumber() {
+  return "ACCT" + Math.floor(100000 + Math.random() * 900000);
+}
