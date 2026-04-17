@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
@@ -5,7 +6,7 @@ const PORT = process.env.PORT || 3000;
 const mongoose = require("mongoose");
 
 mongoose
-  .connect("mongodb://127.0.0.1:27017/ussd_test")
+  .connect(process.env.MONGODO_URI)
   .then(() => console.log("MongoDB Connected Successfully"))
   .catch((err) => console.log(err));
 const User = mongoose.model("User", {
